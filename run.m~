@@ -1,21 +1,20 @@
-
-sm = 5;
-fds = smooth(fdataseg,sm);
-fds2 = fds.^2;
-rmsdata = sqrt(fds2);
-diffdata = diff(fds);
+fdataseg = wavefilter(sev(1:1e6)-cma(1:1e6),6);
+fdatasegNA = artifactThresh(fdataseg, 500);
 
 nplot = 5;
 
 figure;
 hs(1) = subplot(nplot,1,1);
-plot(fdataseg);
+plot(fdatasegNA);
 title('fdataseg')
 
+sm = 10;
+fds = smooth(fdataseg2,sm);
 hs(2) = subplot(nplot,1,2);
 plot(fds);
 title('fds')
 
+diffdata = diff(fds);
 hs(3) = subplot(nplot,1,3);
 plot(diffdata);
 title('diffdata')
@@ -25,18 +24,11 @@ hs(4) = subplot(nplot,1,4);
 plot(diffmult);
 title('diffdata.*(fds2(2:end))');
 
-diffdiffmult = diff(smooth(diffmult)).^2;
-
+diffdiffmult = abs(diff(smooth(diffmult)));
 hs(5) = subplot(nplot,1,5);
 plot(diffdiffmult);
-title('diff(smooth(diffmult)).^2');
+title('abs(diff(smooth(diffmult)))');
 
 linkaxes(hs,'x')
 
-findpeaks(diffdiffmult,'MinPeakDistance',15,'MinPeakHeight',1e6,'Annotate','extents');
-
-% 
-% [sev,header] = read_tdt_sev('/Users/mattgaidica/Documents/Data/ChoiceTask/R0036/R0036-rawdata/R0036_20150225a/R0036_20150225a/R0036_20150225a_data_ch13.sev');
-% fdata = wavefilter(sev,6);
-% decfdata = decimate(fdata,20);
-% plot(linspace(0,length(decfdata)/header.Fs,length(decfdata)));
+%findpeaks(diffdiffmult,'MinPeakDistance',15,'MinPeakHeight',1e6,'Annotate','extents');

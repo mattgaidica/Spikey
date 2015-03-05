@@ -1,9 +1,0 @@
-dataDir = '/Users/mattgaidica/Documents/Data/ChoiceTask/R0036/R0036-rawdata/R0036_20150225a/R0036_20150225a';
-sevFiles = dir(fullfile(dataDir,'*.sev'));
-
-sevCma = [];
-for i=1:16
-    disp(
-    [sev, header] = read_tdt_sev(fullfile(dataDir,sevFiles(i).name));
-    sevCma = mean([sevCma sev]);
-end
