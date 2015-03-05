@@ -1,0 +1,9 @@
+function data=artifactThresh(data,thresh)
+    [pks,locs] = findpeaks(abs(data),'MinPeakHeight',thresh,'Annotate','extents');
+    zeroIdxs = find(abs(data) < 10);
+    for i=1:length(locs)
+        zeroBefore = find(zeroIdxs < loc(i));
+        if(~isempty(zeroBefore))
+            data(zeroBefore:loc(i)
+    end
+end

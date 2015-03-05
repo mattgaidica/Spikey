@@ -1,0 +1,42 @@
+
+sm = 5;
+fds = smooth(fdataseg,sm);
+fds2 = fds.^2;
+rmsdata = sqrt(fds2);
+diffdata = diff(fds);
+
+nplot = 5;
+
+figure;
+hs(1) = subplot(nplot,1,1);
+plot(fdataseg);
+title('fdataseg')
+
+hs(2) = subplot(nplot,1,2);
+plot(fds);
+title('fds')
+
+hs(3) = subplot(nplot,1,3);
+plot(diffdata);
+title('diffdata')
+
+diffmult = diffdata.*(fds(2:end));
+hs(4) = subplot(nplot,1,4);
+plot(diffmult);
+title('diffdata.*(fds2(2:end))');
+
+diffdiffmult = diff(smooth(diffmult)).^2;
+
+hs(5) = subplot(nplot,1,5);
+plot(diffdiffmult);
+title('diff(smooth(diffmult)).^2');
+
+linkaxes(hs,'x')
+
+findpeaks(diffdiffmult,'MinPeakDistance',15,'MinPeakHeight',1e6,'Annotate','extents');
+
+% 
+% [sev,header] = read_tdt_sev('/Users/mattgaidica/Documents/Data/ChoiceTask/R0036/R0036-rawdata/R0036_20150225a/R0036_20150225a/R0036_20150225a_data_ch13.sev');
+% fdata = wavefilter(sev,6);
+% decfdata = decimate(fdata,20);
+% plot(linspace(0,length(decfdata)/header.Fs,length(decfdata)));
