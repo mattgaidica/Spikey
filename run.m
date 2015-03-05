@@ -1,6 +1,4 @@
-fdataseg = wavefilter(sev(1:1e6)-cma(1:1e6),6);
-fdatasegNA = artifactThresh(fdataseg, 500);
-
+fdatasegNA = data(1,1:1e5);
 nplot = 5;
 
 figure;
@@ -28,9 +26,13 @@ title('diffmult');
 % sqrt gives more resolution to low amplitude data
 diffdiffmult = sqrt(abs(diff(diffmult)));
 hs(5) = subplot(nplot,1,5);
-plot(diffdiffmult);
+plot(normalize(diffdiffmult));
+y_snle = snle(fdatasegNA,[1]);
+hold on
+y_snle(y_snle<0)=0;
+plot(normalize(y_snle));
 title('snle');
 
 linkaxes(hs,'x')
 
-findpeaks(diffdiffmult,'MinPeakDistance',25,'MinPeakHeight',5*std(diffdiffmult),'Annotate','extents');
+% findpeaks(diffdiffmult,'MinPeakDistance',25,'MinPeakHeight',4*std(diffdiffmult),'Annotate','extents');
