@@ -5,7 +5,7 @@ function data=artifactThresh(data,thresh)
     baseline = 10;
     for i=1:length(locs)
         if(mod(i,100)==0)
-            disp([num2str(i),' artifacts cured...']);
+            disp([num2str(i),'/',num2str(length(locs)),' artifacts cured...']);
         end
         % get quiet locations before/after artifact peak, this if/else
         % structure reduce computation time significantly
@@ -35,9 +35,6 @@ function data=artifactThresh(data,thresh)
             if(isempty(zeroAfter))
                 zeroAfter = locs(i+1) - 1;
             end
-        end
-        if(i==152)
-            disp('stop')
         end
         % apply zeros to the entire area that the artifact contains, try to
         % minimize amount of operations performed

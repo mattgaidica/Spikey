@@ -11,17 +11,26 @@ function [locs,dataWarped] = getSpikeTimestamps(data,Fs,sensitivity,onlyDowngoin
 showme = true;
 
 % reduce sharpness (used for diff)
-dataSmooth = smooth(data,Fs/5e3);
+disp('Smoothing data...')
+dataSmooth = smooth(data,Fs/5e3); 
 % get rate of change
-dataDiffSmooth = diff(dataSmooth);
+disp('Diff of data...')
+dataDiffSmooth = diff(dataSmooth); 
 % use diff like a gain on the smooth data
+disp('Applying diff as gain...')
 dataMultDiffSmooth = dataSmooth(1:end-1).*dataDiffSmooth;
 % warp this new data so peaks align with original data, use sqrt to enhance
 % low amplitudes
+disp('Warping data...')
 dataWarped = sqrt(abs(diff(dataMultDiffSmooth)));
-% get peaks of warped data
+% remove offset, zero-centered
+dataWarped = dataWarped - mean(dataWarped);
+
+% threshold knob
 sensitivityLevels = linspace(std(dataWarped),max(dataWarped),100);
 
+% get peaks of warped data
+disp('Extracting peaks of warped data...')
 [~,locs] = findpeaks(dataWarped,'MinPeakDistance',Fs/1000,...
     'MinPeakHeight',sensitivityLevels(sensitivity));
 
@@ -33,6 +42,7 @@ end
 % save figure here?
 
 if(showme)
+    disp('Showing you...')
     nSamples = min([500 length(locs)]);
     locWindow = 20;
     someLocs = datasample(locs,nSamples);
