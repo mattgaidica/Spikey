@@ -1,13 +1,14 @@
-fdatasegNA = data(1,1:1e5);
-nplot = 5;
+nplot = 2;
 
 figure;
 hs(1) = subplot(nplot,1,1);
-plot(fdatasegNA);
+plot(sev_ch13HPNA);
 title('fdatasegNA')
 
+
+
 sm = 5;
-fds = smooth(fdatasegNA,sm);
+fds = smooth(sev_ch13HPNA,sm);
 hs(2) = subplot(nplot,1,2);
 plot(fds);
 title('fds')
@@ -26,10 +27,11 @@ title('diffmult');
 % sqrt gives more resolution to low amplitude data
 diffdiffmult = sqrt(abs(diff(diffmult)));
 hs(5) = subplot(nplot,1,5);
-plot(diffdiffmult);
-y_snle = snle(fdatasegNA,[1]);
+plot(normalize(diffdiffmult));
+
 hold on
-plot(nory_snle);
+y_snle(y_snle<0)=0;
+plot(normalize(y_snle));
 title('snle');
 
 linkaxes(hs,'x')

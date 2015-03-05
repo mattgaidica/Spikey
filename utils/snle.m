@@ -1,4 +1,4 @@
-function y_snle = spike_snle(y, goodWires, varargin )
+function y_snle = spike_snle(y,goodWires,Fs)
 %
 % usage: y_snle = snle( y, varargin )
 %
@@ -10,10 +10,6 @@ function y_snle = spike_snle(y, goodWires, varargin )
 %       true value for each good wire, and a false/zero value for each bad
 %       wire
 %
-% varargs:
-%   windowsize - length of the windowing function, in samples; default = 12
-%   windowfunction - type of windowing function to use; default = 'hanning'
-%
 % OUTPUTS:
 %   y_snle - the smoothed nonlinear energy of the input data
 %
@@ -21,22 +17,9 @@ function y_snle = spike_snle(y, goodWires, varargin )
 %   Energy Operator and Its Efficacy is Spike Detection",
 %   IEEE Trans Biomed Eng, 1998
 
-windowSize = 10;
+windowSize = round(Fs/2400);
+snle_T = round(Fs/8000);
 windowFunct = 'hanning';
-snle_T = 3;
-
-for iarg = 1 : 2 : nargin - 2
-    switch lower(varargin{iarg})
-        case 'windowsize',
-            windowSize = varargin{iarg + 1};
-        case 'windowfunction',
-            windowFunct = varargin{iarg + 1};
-        case 'snle_period'
-            snle_T = varargin{iarg + 1};
-    end
-    
-end
-
 numSamps = size(y, 2);
 
 % make sure the window length is odd so there is no phase shift in the

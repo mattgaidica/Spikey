@@ -1,53 +1,28 @@
-function locs = getSpikeTimestamps(data,Fs,sensitivity,onlyDowngoing)
-% pre-process data: common mode average -> high pass -> artifact removal
-% sensitivity: 0-100 (100 is REALLY sensitive)
+function locs = getSpikeTimestamps(data,goodWires,Fs,nStd,onlyGoing)
+% pre-process data: high pass -> artifact removal
 % data = nCh x nSamples
-
-% usage:
-% sev=sev-cma;
-% fdata=wavefilter(sev,6);
-% fdataNA = artifactThresh(fdata,500);
+% [ ] save figures? Configs?
 
 showme = true;
 
-% minus 2 because 2 diffs are used below
-sumDataWarped = zeros(1,size(data,2)-2);
-for i=1:size(data,1)
-    disp(['Processing data set ',num2str(i),'...']);
-    % reduce sharpness (used for diff)
-    disp('Smoothing data...')
-    dataSmooth = smooth(data(i,:),Fs/5e3);
-    % get rate of change
-    disp('Diff of data...')
-    dataDiffSmooth = diff(dataSmooth);
-    % use diff like a gain on the smooth data
-    disp('Applying diff as gain...')
-    dataMultDiffSmooth = dataSmooth(1:end-1).*dataDiffSmooth;
-    % warp this new data so peaks align with original data, use sqrt to enhance
-    % low amplitudes
-    disp('Warping data...')
-    dataWarped = sqrt(abs(diff(dataMultDiffSmooth)));
-    % remove offset, zero-centered
-    dataWarped = dataWarped - mean(dataWarped);
-    sumDataWarped = sumDataWarped + dataWarped';
-    clear('dataDiffSmooth','dataMultDiffSmooth','dataSmooth','dataWarped');
-end
-% threshold knob
-sensitivityLevels = linspace(std(sumDataWarped),max(sumDataWarped),100);
-disp(['raw sensitivity = ',num2str(sensitivityLevels(sensitivity))]);
-% get peaks of warped data
-disp('Extracting peaks of summed warped data...')
-[~,locs] = findpeaks(sumDataWarped,'MinPeakDistance',Fs/1000,...
-    'MinPeakHeight',sensitivityLevels(sensitivity));
+disp('Calculating SNLE data...')
+y_snle = snle(data,goodWires,Fs);
+disp('Extracting peaks of summed SNLE data...')
+minpeakdist = Fs/1000;
+minpeakh = nStd * mean(std(y_snle,[],2)); %3 is good!
+locs = peakseek(sum(y_snle),minpeakdist,minpeakh);
 
 % this forces all lines to be negative for extracts, not sure that's a good
 % way to think about this feature
-if(onlyDowngoing)
-    locsDown = max(data(:,locs)) < 0;
-    locs = locs(locsDown);
-    disp([num2str(round(length(locs)/length(locsDown)*100)),'% downgoing...']);
+if(onlyGoing)
+    if(onlyGoing == 1) 
+        locsGoing = min(data(:,locs)) > 0; %positive spikes
+    else 
+        locsGoing = max(data(:,locs)) < 0; %negative spikes
+    end
+    locs = locs(locsGoing);
+    disp([num2str(round(length(locs)/length(locsGoing)*100)),'% spikes going your way...']);
 end
-% save figure here?
 
 if(showme)
     disp('Showing you...')
@@ -65,4 +40,3 @@ if(showme)
         ylabel('amplitude')
     end
 end
-clear('data');
