@@ -1,16 +1,17 @@
 function createPLXFiles(nasPath)
-    spikeParameterString = sprintf('WL%02d_PL%02d_DT%02d', waveLength, peakLoc, deadTime);
-
-    % see exportSessionConf.m for details
+    % see exportSessionConf.m for details, loads sessionConf variable
     [f,p] = uigetfile({'*.mat'},'Select configuration file...');
-    % loads sessionConf variable
     load(fullfile(p,f));
+    
+   spikeParameterString = sprintf('WL%02d_PL%02d_DT%02d', sessionConf.waveLength,...
+       sessionConf.peakLoc, sessionConf.deadTime);
+
 
     sessionPath = fullfile(nasPath, sessionConf.ratID,...
         [sessionConf.ratID,'-rawdata'],sessionConf.sessionName,sessionConf.sessionName);
     processedSessionPath = fullfile(nasPath,sessionConf.ratID,[sessionConf.ratID,'-processed']);
+    % create if doesn't exist
 
-    % 'sessionName','chMap','ratID','validMasks'
     validTetrodes = find(any(sessionConf.validMasks,2).*sessionConf.chMap(:,1));
     [chFileMap,fullSevFiles] = getChFileMap(sessionPath);
     
@@ -21,12 +22,17 @@ function createPLXFiles(nasPath)
         
         tetrodeFilenames = fullSevFiles(chFileMap(tetrodeChannels));
         data = prepSEVData(tetrodeFilenames,tetrodeValidMask,500);
-        locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,3,-1);
+        locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'negative');
         
-        PLX_fn = fullfile(processedSessionPath,[sessionConf.sessionName,...
+        PLXfn = fullfile(processedSessionPath,[sessionConf.sessionName,...
             '_',tetrodeName,'_',spikeParameterString,'.plx']);
         PLXid = makePLXInfo(PLXfn,sessionConf,tetrodeChannels,length(data));
         makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName);
+        
+        ts = locs/sessionConf.Fs;
+        waveforms = extractWaveforms(data,ts,sessionConf.peakLoc,...
+            sessionConf.waveLength);
+        writePLXdatablock(PLXid,waveforms,ts);
     end
 end
 
@@ -36,6 +42,7 @@ function [chFileMap,fullSevFiles] = getChFileMap(sessionPath)
         chFileMap(ii) = getSEVChFromFilename(sevFiles(ii).name);
         fullSevFiles{ii} = fullfile(sessionPath,sevFiles(ii).name);
     end
+    fullSevFiles(chFileMap); %remap so they are in order
 end
 
 function ch = getSEVChFromFilename(name)

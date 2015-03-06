@@ -33,6 +33,6 @@ plxInfo.SlowMaxMagnitudeMV  = 10000;
 
 plxInfo.SpikePreAmpGain = 1; % gain before final amplification stage
 
-%PLXid = fopen(PLX_fn, 'w');
+PLXid = fopen(PLXfn, 'w');
 disp('PLX file opened...')
-%writePLXheader(PLXid, plxInfo);
+writePLXheader(PLXid, plxInfo);

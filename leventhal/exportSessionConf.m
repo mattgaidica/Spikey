@@ -18,7 +18,7 @@ sessionConf.tetrodeNames = chMap.tetNames;
 sessionConf.Fs = 2.441406250000000e+04;
 sessionConf.waveLength = 24;
 sessionConf.peakLoc = 8;
-sessionConf.deadTime = 16;
+sessionConf.deadTime = round(sessionConf.Fs/1000); %see getSpikeLocations.m
 
 filename = ['session_conf_',sessionName,'.mat'];
 filePath = fullfile(saveDir,filename);
