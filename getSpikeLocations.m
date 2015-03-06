@@ -1,19 +1,15 @@
-function locs = getSpikeTimestamps(data,goodWires,Fs,nStd,onlyGoing)
-% pre-process data: common mode average -> high pass -> artifact removal
-% sensitivity: 0-100 (100 is REALLY sensitive)
+function locs = getSpikeLocations(data,validMask,Fs,nStd,onlyGoing)
+% pre-process data: high pass -> artifact removal
 % data = nCh x nSamples
-
-% usage:
-% sev=sev-cma;
-% fdata=wavefilter(sev,6);
-% fdataNA = artifactThresh(fdata,500);
+% [ ] save figures? Configs?
 
 showme = true;
+
 disp('Calculating SNLE data...')
-y_snle = snle(data,goodWires,Fs);
+y_snle = spikeSnle(data,validMask,Fs);
 disp('Extracting peaks of summed SNLE data...')
 minpeakdist = Fs/1000;
-minpeakh = nStd * mean(std(y_snle,[],2)); %3 
+minpeakh = nStd * mean(std(y_snle,[],2)); %3 is good!
 locs = peakseek(sum(y_snle),minpeakdist,minpeakh);
 
 % this forces all lines to be negative for extracts, not sure that's a good
@@ -27,7 +23,6 @@ if(onlyGoing)
     locs = locs(locsGoing);
     disp([num2str(round(length(locs)/length(locsGoing)*100)),'% spikes going your way...']);
 end
-% save figure here?
 
 if(showme)
     disp('Showing you...')
