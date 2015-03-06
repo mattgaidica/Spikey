@@ -20,7 +20,7 @@ function createPLXFiles(nasPath)
         tetrodeName = sessionConf.tetrodeNames{validTetrodes(ii)};
         tetrodeValidMask = sessionConf.validMasks(validTetrodes(ii),:);
         
-        tetrodeFilenames = fullSevFiles(chFileMap(tetrodeChannels));
+        tetrodeFilenames = fullSevFiles(tetrodeChannels);
         data = prepSEVData(tetrodeFilenames,tetrodeValidMask,500);
         locs = getSpikeLocations(data,tetrodeValidMask,sessionConf.Fs,'negative');
         
@@ -29,10 +29,11 @@ function createPLXFiles(nasPath)
         PLXid = makePLXInfo(PLXfn,sessionConf,tetrodeChannels,length(data));
         makePLXChannelHeader(PLXid,sessionConf,tetrodeChannels,tetrodeName);
         
-        ts = locs/sessionConf.Fs;
-        waveforms = extractWaveforms(data,ts,sessionConf.peakLoc,...
+        disp('Extracing waveforms...');
+        waveforms = extractWaveforms(data,locs,sessionConf.peakLoc,...
             sessionConf.waveLength);
-        writePLXdatablock(PLXid,waveforms,ts);
+        disp('Writing waveforms to PLX file...');
+        writePLXdatablock(PLXid,waveforms,locs);
     end
 end
 
@@ -42,7 +43,7 @@ function [chFileMap,fullSevFiles] = getChFileMap(sessionPath)
         chFileMap(ii) = getSEVChFromFilename(sevFiles(ii).name);
         fullSevFiles{ii} = fullfile(sessionPath,sevFiles(ii).name);
     end
-    fullSevFiles(chFileMap); %remap so they are in order
+    fullSevFiles(chFileMap) = fullSevFiles; %remap so they are in order
 end
 
 function ch = getSEVChFromFilename(name)
